@@ -1,47 +1,124 @@
 function renderCanvas() {
   const canvas = document.getElementById("canvas")
   const cropper = document.getElementById("cropper")
+  const cropBtn = document.getElementById("cropBtn")
   // const canvas_shapes = document.getElementById("canvas_shapes")
   if (canvas.getContext) {
     const ctx = canvas.getContext("2d");
     const image = new Image()
     image.src = "https://placehold.co/600x600?text=image-test"
     let cropperBoundingRect = cropper.getBoundingClientRect()
-    const p1 = [cropperBoundingRect.left, cropperBoundingRect.top];
-    const p2 = [cropperBoundingRect.right, cropperBoundingRect.top];
-    const p3 = [cropperBoundingRect.left, cropperBoundingRect.bottom];
-    const p4 = [cropperBoundingRect.right, cropperBoundingRect.bottom];
+    const p1 = {
+      name: "point1",
+      x: cropperBoundingRect.left,
+      y: cropperBoundingRect.top,
+      initialHeight: cropperBoundingRect.height,
+      initialWidth: cropperBoundingRect.width,
+      initX: 0,
+      initY: 0
+    };
+
+    const p2 = {
+      name: "point2",
+      x: cropperBoundingRect.right,
+      y: cropperBoundingRect.top,
+      initialHeight: cropperBoundingRect.height,
+      initialWidth: cropperBoundingRect.width,
+      initX: 0,
+      initY: 0
+    };
+
+    const p3 = {
+      name: "point3",
+      x: cropperBoundingRect.left,
+      y: cropperBoundingRect.bottom,
+      initialHeight: cropperBoundingRect.height,
+      initialWidth: cropperBoundingRect.width,
+      initX: 0,
+      initY: 0
+    };
+
+    const p4 = {
+      name: "point4",
+      x: cropperBoundingRect.right,
+      y: cropperBoundingRect.bottom,
+      initialHeight: cropperBoundingRect.height,
+      initialWidth: cropperBoundingRect.width,
+      initX: 0,
+      initY: 0
+    };
+
     const threshold = 10;
-    let initialWidth
-    let initialHeight
-    let initialX
-    let initialY
-    let isResizing = false
+    let isResizing = {
+      resizing: false,
+      point: ""
+    }
     document.addEventListener("mousedown", (e) => {
-      if ((e.pageX - p1[0]) ** 2 + (e.pageY - p1[1]) ** 2 <= threshold ** 2) {
+      if ((e.pageX - p1.x) ** 2 + (e.pageY - p1.y) ** 2 <= threshold ** 2) {
         console.log("Clicked on p1 (Top-Left)", p1);
+        p1.initX = e.pageX
+        p1.initY = e.pageY
+        p1.initialWidth = parseFloat(cropper.style.width) || cropperBoundingRect.width;
+        p1.initialHeight = parseFloat(cropper.style.height) || cropperBoundingRect.height;
+        isResizing.resizing = true
+        isResizing.point = p1
       }
-      if ((e.pageX - p2[0]) ** 2 + (e.pageY - p2[1]) ** 2 <= threshold ** 2) {
+      if ((e.pageX - p2.x) ** 2 + (e.pageY - p2.y) ** 2 <= threshold ** 2) {
         console.log("Clicked on p2 (Top-Right)", p2);
+        p2.initX = e.pageX
+        p2.initY = e.pageY
+        p2.initialWidth = parseFloat(cropper.style.width) || cropperBoundingRect.width;
+        p2.initialHeight = parseFloat(cropper.style.height) || cropperBoundingRect.height;
+        isResizing.resizing = true
+        isResizing.point = p2
       }
-      if ((e.pageX - p3[0]) ** 2 + (e.pageY - p3[1]) ** 2 <= threshold ** 2) {
+      if ((e.pageX - p3.x) ** 2 + (e.pageY - p3.y) ** 2 <= threshold ** 2) {
         console.log("Clicked on p3 (Bottom-Left)", p3);
+        p3.initX = e.pageX
+        p3.initY = e.pageY
+        p3.initialWidth = parseFloat(cropper.style.width) || cropperBoundingRect.width;
+        p3.initialHeight = parseFloat(cropper.style.height) || cropperBoundingRect.height;
+        isResizing.resizing = true
+        isResizing.point = p3
       }
-      if ((e.pageX - p4[0]) ** 2 + (e.pageY - p4[1]) ** 2 <= threshold ** 2) {
-        isResizing = true
+      if ((e.pageX - p4.x) ** 2 + (e.pageY - p4.y) ** 2 <= threshold ** 2) {
         console.log("Clicked on p4 (Bottom-Right)", p4);
-        initialWidth = parseFloat(cropper.style.width) || cropperBoundingRect.width;
-        initialHeight = parseFloat(cropper.style.height) || cropperBoundingRect.height;
-        initialX = e.pageX;
-        initialY = e.pageY;
+        p4.initX = e.pageX
+        p4.initY = e.pageY
+        p4.initialWidth = parseFloat(cropper.style.width) || cropperBoundingRect.width;
+        p4.initialHeight = parseFloat(cropper.style.height) || cropperBoundingRect.height;
+        isResizing.resizing = true
+        isResizing.point = p4
       }
     })
     function resize(e) {
-      if (isResizing) {
-        const newWidth = initialWidth + (e.pageX - initialX);
-        const newHeight = initialHeight + (e.pageY - initialY);
-        cropper.style.width = newWidth + "px";
-        cropper.style.height = newHeight + "px";
+      if (isResizing.resizing) {
+        switch (isResizing.point.name) {
+          case "point1":
+            newTop = isResizing.point.initY + (e.pageY - isResizing.point.initY)
+            newLeft = isResizing.point.initX + (e.pageX - isResizing.point.initX)
+            cropper.style.top = newTop + "px"
+            cropper.style.left = newLeft + "px"
+            break
+          case "point2":
+            newTop = isResizing.point.initY + (e.pageY - isResizing.point.initY)
+            newWidth = isResizing.point.initialWidth + (e.pageX - isResizing.point.initX);
+            cropper.style.top = newTop + "px"
+            cropper.style.width = newWidth + "px";
+            break
+          case "point3":
+            newLeft = isResizing.point.initX + (e.pageX - isResizing.point.initX)
+            newHeight = isResizing.point.initialHeight + (e.pageY - isResizing.point.initY);
+            cropper.style.left = newLeft + "px"
+            cropper.style.height = newHeight + "px";
+            break
+          case "point4":
+            newWidth = isResizing.point.initialWidth + (e.pageX - isResizing.point.initX);
+            newHeight = isResizing.point.initialHeight + (e.pageY - isResizing.point.initY);
+            cropper.style.width = newWidth + "px";
+            cropper.style.height = newHeight + "px";
+            break
+        }
         console.log(cropper.style.width, cropper.style.height)
       }
     }
@@ -50,15 +127,26 @@ function renderCanvas() {
       resize(e)
     })
     document.addEventListener("mouseup", (e) => {
-      console.log("????")
-      if (isResizing) {
-        isResizing = false
-        p4[0] = cropper.getBoundingClientRect().right
-        p4[1] = cropper.getBoundingClientRect().bottom
+      if (isResizing.resizing) {
+        isResizing.resizing = false
         cropperBoundingRect = cropper.getBoundingClientRect()
-        ctx.clearRect(0, 0, 600, 600)
-        ctx.drawImage(image, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
+        p1.x = cropperBoundingRect.left
+        p1.y = cropperBoundingRect.top
+
+        p2.x = cropperBoundingRect.right
+        p2.y = cropperBoundingRect.top
+
+        p3.x = cropperBoundingRect.left
+        p3.y = cropperBoundingRect.bottom
+
+        p4.x = cropperBoundingRect.right
+        p4.y = cropperBoundingRect.bottom
+
       }
+    })
+    cropBtn.addEventListener("click", () => {
+      ctx.clearRect(0, 0, 600, 600)
+      ctx.drawImage(image, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
     })
     const canvasBoundingRect = canvas.getBoundingClientRect()
     image.onload = () => {
