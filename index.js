@@ -160,7 +160,11 @@ function renderCanvas() {
     })
     cropBtn.addEventListener("click", () => {
       ctx.clearRect(0, 0, 600, 600)
-      ctx.drawImage(image, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
+      ctx.beginPath();
+      ctx.rect(cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
+      ctx.clip()
+      // ctx.drawImage(image, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
+      ctx.drawImage(image, 0, 0)
       const imageData = ctx.getImageData(0, 0, 600, 600)
       console.log(imageData)
     })
