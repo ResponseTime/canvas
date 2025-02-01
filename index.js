@@ -6,6 +6,7 @@ function renderCanvas() {
   if (canvas.getContext) {
     const ctx = canvas.getContext("2d");
     const image = new Image()
+    image.crossOrigin = "anonymous"
     image.src = "https://placehold.co/600x600?text=image-test"
     let cropperBoundingRect = cropper.getBoundingClientRect()
     const p1 = {
@@ -97,19 +98,27 @@ function renderCanvas() {
           case "point1":
             newTop = isResizing.point.initY + (e.pageY - isResizing.point.initY)
             newLeft = isResizing.point.initX + (e.pageX - isResizing.point.initX)
+            newHeight = isResizing.point.initialHeight + (isResizing.point.initY - e.pageY)
+            newWidth = isResizing.point.initialWidth + (isResizing.point.initX - e.pageX);
             cropper.style.top = newTop + "px"
             cropper.style.left = newLeft + "px"
+            cropper.style.width = newWidth + "px";
+            cropper.style.height = newHeight + "px"
             break
           case "point2":
             newTop = isResizing.point.initY + (e.pageY - isResizing.point.initY)
             newWidth = isResizing.point.initialWidth + (e.pageX - isResizing.point.initX);
+            newHeight = isResizing.point.initialHeight + (isResizing.point.initY - e.pageY)
             cropper.style.top = newTop + "px"
             cropper.style.width = newWidth + "px";
+            cropper.style.height = newHeight + "px"
             break
           case "point3":
             newLeft = isResizing.point.initX + (e.pageX - isResizing.point.initX)
             newHeight = isResizing.point.initialHeight + (e.pageY - isResizing.point.initY);
+            newWidth = isResizing.point.initialWidth + (isResizing.point.initX - e.pageX);
             cropper.style.left = newLeft + "px"
+            cropper.style.width = newWidth + "px"
             cropper.style.height = newHeight + "px";
             break
           case "point4":
@@ -124,7 +133,12 @@ function renderCanvas() {
     }
 
     document.addEventListener("mousemove", (e) => {
-      resize(e)
+      if (e.pageX < 0 || e.pageY >= 600 || e.pageX >= 600 || e.pageY < 0) {
+        console.log("boundary reached")
+        return
+      } else {
+        resize(e)
+      }
     })
     document.addEventListener("mouseup", (e) => {
       if (isResizing.resizing) {
@@ -147,6 +161,8 @@ function renderCanvas() {
     cropBtn.addEventListener("click", () => {
       ctx.clearRect(0, 0, 600, 600)
       ctx.drawImage(image, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
+      const imageData = ctx.getImageData(0, 0, 600, 600)
+      console.log(imageData)
     })
     const canvasBoundingRect = canvas.getBoundingClientRect()
     image.onload = () => {
