@@ -92,6 +92,7 @@ function renderCanvas() {
         isResizing.point = p4
       }
     })
+    let lastExecution = 0;
     function resize(e) {
       if (isResizing.resizing) {
         switch (isResizing.point.name) {
@@ -128,6 +129,9 @@ function renderCanvas() {
             cropper.style.height = newHeight + "px";
             break
         }
+        let FPS_CAP = Math.floor(1000 / 60); //~60FPS
+        if (Date.now() - lastExecution < FPS_CAP) return;
+        lastExecution = Date.now();
         ctx.clearRect(0, 0, 600, 600)
         ctx.drawImage(image, cropper.getBoundingClientRect().left - canvasBoundingRect.left, cropper.getBoundingClientRect().top - canvasBoundingRect.top, cropper.getBoundingClientRect().width, cropper.getBoundingClientRect().height)
       }
