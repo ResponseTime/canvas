@@ -10,3 +10,20 @@ canvas{
   height: 500px;
   border: 1px solid black;
 }
+
+
+#block{
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  position: relative;
+  animation: circle 5s ease-in-out 0s infinite forwards;
+}
+
+@keyframes circle {
+  0% { left: 0; top: 0; }
+  30% { left: 500px; top: 0; }  
+  60% { left: 500px; top: 200px; } 
+  85% { left: 0; top: 200px; }  
+  100% { left: 0; top: 0; }  
+}

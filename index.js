@@ -2,10 +2,23 @@ function renderCanvas() {
   const canvas = document.getElementById("canvas")
   const cropper = document.getElementById("cropper")
   const cropBtn = document.getElementById("cropBtn")
+  const opts = document.getElementById("opts")
   // const canvas_shapes = document.getElementById("canvas_shapes")
   if (canvas.getContext) {
+    let opt;
+    opts.addEventListener("input", (e) => {
+      opt = e.target.value
+      console.log(opt)
+      if (opt === "crop_image") {
+        ctx.clearRect(0, 0, 600, 600)
+        ctx.drawImage(image, 50, 50)
+        cropBtn.style.display = "block"
+      } else {
+        cropBtn.style.display = "none"
+      }
+    })
     const ctx = canvas.getContext("2d");
-    const image = new Image()
+    let image = new Image()
     image.crossOrigin = "anonymous"
     image.src = "https://placehold.co/500x500?text=image-test"
     let cropperBoundingRect = cropper.getBoundingClientRect()
@@ -129,11 +142,24 @@ function renderCanvas() {
             cropper.style.height = newHeight + "px";
             break
         }
-        let FPS_CAP = Math.floor(1000 / 60); //~60FPS
-        if (Date.now() - lastExecution < FPS_CAP) return;
-        lastExecution = Date.now();
-        ctx.clearRect(0, 0, 600, 600)
-        ctx.drawImage(image, cropper.getBoundingClientRect().left - canvasBoundingRect.left, cropper.getBoundingClientRect().top - canvasBoundingRect.top, cropper.getBoundingClientRect().width, cropper.getBoundingClientRect().height)
+        if (opt === "resize_image") {
+          let FPS_CAP = Math.floor(1000 / 60); //~60FPS
+          if (Date.now() - lastExecution < FPS_CAP) return;
+          lastExecution = Date.now();
+          console.log(image.src)
+          console.log(image)
+          ctx.clearRect(0, 0, 600, 600)
+          ctx.drawImage(image, cropper.getBoundingClientRect().left - canvasBoundingRect.left, cropper.getBoundingClientRect().top - canvasBoundingRect.top, cropper.getBoundingClientRect().width, cropper.getBoundingClientRect().height)
+          // canvas.toBlob((data) => {
+          //   let img = new Image()
+          //   let url = URL.createObjectURL(data)
+          //   img.onload = () => {
+          //     image = img
+          //     console.log(image)
+          //   }
+          //   img.src = url
+          // }, 'image/png')
+        }
       }
     }
 
@@ -164,14 +190,25 @@ function renderCanvas() {
       }
     })
     cropBtn.addEventListener("click", () => {
+      // ctx.beginPath();
+      // ctx.rect(cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
+      // ctx.clip()
       ctx.clearRect(0, 0, 600, 600)
-      ctx.beginPath();
-      ctx.rect(cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
-      ctx.clip()
-      // ctx.drawImage(image, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
-      ctx.drawImage(image, 0, 0)
-      const imageData = ctx.getImageData(0, 0, 600, 600)
-      console.log(imageData)
+      ctx.drawImage(image, cropperBoundingRect.left - canvasBoundingRect.left - 50, cropperBoundingRect.top - canvasBoundingRect.top - 50, cropperBoundingRect.width, cropperBoundingRect.height, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
+      const imageData = ctx.getImageData(cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
+      let tempCanvas = document.createElement('canvas');
+      let tempCtx = tempCanvas.getContext('2d');
+      tempCanvas.width = imageData.width;
+      tempCanvas.height = imageData.height;
+      tempCtx.putImageData(imageData, 0, 0);
+      tempCanvas.toBlob((blob) => {
+        let url = URL.createObjectURL(blob);
+        let img = new Image();
+        img.onload = () => {
+          image = img
+        };
+        img.src = url;
+      }, 'image/png');
     })
     const canvasBoundingRect = canvas.getBoundingClientRect()
     image.onload = () => {
