@@ -7,7 +7,7 @@ function renderCanvas() {
     const ctx = canvas.getContext("2d");
     const image = new Image()
     image.crossOrigin = "anonymous"
-    image.src = "https://placehold.co/600x600?text=image-test"
+    image.src = "https://placehold.co/500x500?text=image-test"
     let cropperBoundingRect = cropper.getBoundingClientRect()
     const p1 = {
       name: "point1",
@@ -128,12 +128,13 @@ function renderCanvas() {
             cropper.style.height = newHeight + "px";
             break
         }
-        console.log(cropper.style.width, cropper.style.height)
+        ctx.clearRect(0, 0, 600, 600)
+        ctx.drawImage(image, cropper.getBoundingClientRect().left - canvasBoundingRect.left, cropper.getBoundingClientRect().top - canvasBoundingRect.top, cropper.getBoundingClientRect().width, cropper.getBoundingClientRect().height)
       }
     }
 
     document.addEventListener("mousemove", (e) => {
-      if (e.pageX < 0 || e.pageY >= 600 || e.pageX >= 600 || e.pageY < 0) {
+      if (e.pageX <= 0 || e.pageY >= 600 || e.pageX >= 600 || e.pageY <= 0) {
         console.log("boundary reached")
         return
       } else {
@@ -170,7 +171,7 @@ function renderCanvas() {
     })
     const canvasBoundingRect = canvas.getBoundingClientRect()
     image.onload = () => {
-      ctx.drawImage(image, 0, 0)
+      ctx.drawImage(image, 50, 50)
       // ctx.drawImage(image, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
     }
     // ctx.beginPath()
