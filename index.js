@@ -3,6 +3,7 @@ function renderCanvas() {
   const cropper = document.getElementById("cropper")
   const cropBtn = document.getElementById("cropBtn")
   const opts = document.getElementById("opts")
+
   // const canvas_shapes = document.getElementById("canvas_shapes")
   if (canvas.getContext) {
     let opt;
@@ -76,6 +77,7 @@ function renderCanvas() {
         p1.initialHeight = parseFloat(cropper.style.height) || cropperBoundingRect.height;
         isResizing.resizing = true
         isResizing.point = p1
+        document.body.style.cursor = "nwse-resize"
       }
       if ((e.pageX - p2.x) ** 2 + (e.pageY - p2.y) ** 2 <= threshold ** 2) {
         console.log("Clicked on p2 (Top-Right)", p2);
@@ -85,6 +87,7 @@ function renderCanvas() {
         p2.initialHeight = parseFloat(cropper.style.height) || cropperBoundingRect.height;
         isResizing.resizing = true
         isResizing.point = p2
+        document.body.style.cursor = "nesw-resize"
       }
       if ((e.pageX - p3.x) ** 2 + (e.pageY - p3.y) ** 2 <= threshold ** 2) {
         console.log("Clicked on p3 (Bottom-Left)", p3);
@@ -94,6 +97,7 @@ function renderCanvas() {
         p3.initialHeight = parseFloat(cropper.style.height) || cropperBoundingRect.height;
         isResizing.resizing = true
         isResizing.point = p3
+        document.body.style.cursor = "nesw-resize"
       }
       if ((e.pageX - p4.x) ** 2 + (e.pageY - p4.y) ** 2 <= threshold ** 2) {
         console.log("Clicked on p4 (Bottom-Right)", p4);
@@ -103,6 +107,7 @@ function renderCanvas() {
         p4.initialHeight = parseFloat(cropper.style.height) || cropperBoundingRect.height;
         isResizing.resizing = true
         isResizing.point = p4
+        document.body.style.cursor = "nwse-resize"
       }
     })
     let lastExecution = 0;
@@ -118,6 +123,7 @@ function renderCanvas() {
             cropper.style.left = newLeft + "px"
             cropper.style.width = newWidth + "px";
             cropper.style.height = newHeight + "px"
+            document.body.style.cursor = "nwse-resize"
             break
           case "point2":
             newTop = isResizing.point.initY + (e.pageY - isResizing.point.initY)
@@ -126,6 +132,7 @@ function renderCanvas() {
             cropper.style.top = newTop + "px"
             cropper.style.width = newWidth + "px";
             cropper.style.height = newHeight + "px"
+            document.body.style.cursor = "nesw-resize"
             break
           case "point3":
             newLeft = isResizing.point.initX + (e.pageX - isResizing.point.initX)
@@ -134,12 +141,14 @@ function renderCanvas() {
             cropper.style.left = newLeft + "px"
             cropper.style.width = newWidth + "px"
             cropper.style.height = newHeight + "px";
+            document.body.style.cursor = "nesw-resize"
             break
           case "point4":
             newWidth = isResizing.point.initialWidth + (e.pageX - isResizing.point.initX);
             newHeight = isResizing.point.initialHeight + (e.pageY - isResizing.point.initY);
             cropper.style.width = newWidth + "px";
             cropper.style.height = newHeight + "px";
+            document.body.style.cursor = "nwse-resize"
             break
         }
         if (opt === "resize_image") {
@@ -150,15 +159,20 @@ function renderCanvas() {
           console.log(image)
           ctx.clearRect(0, 0, 600, 600)
           ctx.drawImage(image, cropper.getBoundingClientRect().left - canvasBoundingRect.left, cropper.getBoundingClientRect().top - canvasBoundingRect.top, cropper.getBoundingClientRect().width, cropper.getBoundingClientRect().height)
-          // canvas.toBlob((data) => {
-          //   let img = new Image()
-          //   let url = URL.createObjectURL(data)
+          // const imageData = ctx.getImageData(cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
+          // let tempCanvas = document.createElement('canvas');
+          // let tempCtx = tempCanvas.getContext('2d');
+          // tempCanvas.width = imageData.width;
+          // tempCanvas.height = imageData.height;
+          // tempCtx.putImageData(imageData, 0, 0);
+          // tempCanvas.toBlob((blob) => {
+          //   let url = URL.createObjectURL(blob);
+          //   let img = new Image();
           //   img.onload = () => {
           //     image = img
-          //     console.log(image)
-          //   }
-          //   img.src = url
-          // }, 'image/png')
+          //   };
+          //   img.src = url;
+          // }, 'image/png');
         }
       }
     }
@@ -172,6 +186,7 @@ function renderCanvas() {
       }
     })
     document.addEventListener("mouseup", (e) => {
+      document.body.style.cursor = ""
       if (isResizing.resizing) {
         isResizing.resizing = false
         cropperBoundingRect = cropper.getBoundingClientRect()
@@ -193,22 +208,47 @@ function renderCanvas() {
       // ctx.beginPath();
       // ctx.rect(cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
       // ctx.clip()
+      const currentState = ctx.getImageData(0, 0, 600, 600)
+      undoStack.push(currentState)
+      redoStack.length = 0
       ctx.clearRect(0, 0, 600, 600)
       ctx.drawImage(image, cropperBoundingRect.left - canvasBoundingRect.left - 50, cropperBoundingRect.top - canvasBoundingRect.top - 50, cropperBoundingRect.width, cropperBoundingRect.height, cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
-      const imageData = ctx.getImageData(cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
-      let tempCanvas = document.createElement('canvas');
-      let tempCtx = tempCanvas.getContext('2d');
-      tempCanvas.width = imageData.width;
-      tempCanvas.height = imageData.height;
-      tempCtx.putImageData(imageData, 0, 0);
-      tempCanvas.toBlob((blob) => {
-        let url = URL.createObjectURL(blob);
-        let img = new Image();
-        img.onload = () => {
-          image = img
-        };
-        img.src = url;
-      }, 'image/png');
+      // const imageData = ctx.getImageData(cropperBoundingRect.left - canvasBoundingRect.left, cropperBoundingRect.top - canvasBoundingRect.top, cropperBoundingRect.width, cropperBoundingRect.height)
+      // let tempCanvas = document.createElement('canvas');
+      // let tempCtx = tempCanvas.getContext('2d');
+      // tempCanvas.width = imageData.width;
+      // tempCanvas.height = imageData.height;
+      // tempCtx.putImageData(imageData, 0, 0);
+      // tempCanvas.toBlob((blob) => {
+      //   let url = URL.createObjectURL(blob);
+      //   let img = new Image();
+      //   img.onload = () => {
+      //     image = img
+      //   };
+      //   img.src = url;
+      // }, 'image/png');
+    })
+    undo.addEventListener("click", (e) => {
+      // if (!points.length) return;
+      // let point = points.pop()
+      // redoStack.push(point)
+      // point.style.display = "none"
+      if (!undoStack.length) return;
+      const state = undoStack.pop()
+      const currentState = ctx.getImageData(0, 0, 600, 600)
+      redoStack.push(currentState)
+      ctx.putImageData(state, 0, 0)
+    })
+
+    redo.addEventListener("click", (e) => {
+      if (!redoStack.length) return;
+      // let point = redoStack.pop()
+      // point.style.display = "block"
+      // points.push(point)
+      const currentState = ctx.getImageData(0, 0, 600, 600)
+      undoStack.push(currentState)
+      const state = redoStack.pop()
+      ctx.putImageData(state, 0, 0)
     })
     const canvasBoundingRect = canvas.getBoundingClientRect()
     image.onload = () => {
@@ -462,3 +502,48 @@ function renderCanvas() {
   }
 }
 window.addEventListener("load", renderCanvas)
+const undo = document.getElementById("undo")
+const redo = document.getElementById("redo")
+const circleSpawn = document.getElementById("circleSpawn")
+const points = []
+const undoStack = []
+const redoStack = []
+
+circleSpawn.addEventListener("click", (e) => {
+  let circle = document.createElement("div")
+  circle.style.width = "50px"
+  circle.style.height = "50px"
+  circle.style.borderRadius = "100%"
+  circle.style.backgroundColor = "red"
+  circle.style.position = "absolute"
+  document.body.append(circle)
+  circle.style.left = e.pageX - circle.offsetWidth / 2 + "px"
+  circle.style.top = e.pageY - circle.offsetHeight / 2 + "px"
+  if (circle.getBoundingClientRect().left < circleSpawn.getBoundingClientRect().left) {
+    circle.style.left = circleSpawn.getBoundingClientRect().left + "px"
+  }
+  console.log(circle.getBoundingClientRect().bottom, circleSpawn.getBoundingClientRect().bottom)
+  if (circle.getBoundingClientRect().bottom > circleSpawn.getBoundingClientRect().bottom) {
+    circle.style.top = circleSpawn.getBoundingClientRect().bottom + "px"
+  }
+  points.push(circle)
+})
+
+
+// undo.addEventListener("click", (e) => {
+//   // if (!points.length) return;
+//   // let point = points.pop()
+//   // redoStack.push(point)
+//   // point.style.display = "none"
+//   if (!undoStack.length) return;
+//   const state = undoStack.pop()
+//   ctx.putImageData(state, 0, 0, 600, 600)
+//   redoStack.push(state)
+// })
+
+// redo.addEventListener("click", (e) => {
+//   // if (!redoStack.length) return;
+//   // let point = redoStack.pop()
+//   // point.style.display = "block"
+//   // points.push(point)
+// })

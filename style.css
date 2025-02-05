@@ -27,3 +27,12 @@ canvas{
   85% { left: 0; top: 200px; }  
   100% { left: 0; top: 0; }  
 }
+
+#circleSpawn{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 600px;
+  height: 600px;
+  border: 1px solid black;
+}
