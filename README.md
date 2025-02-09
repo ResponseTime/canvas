@@ -27,11 +27,11 @@ Ensure you have a modern web browser (Chrome, Firefox, Edge, etc.) to run the pr
 ### Running the Project
 1. Clone this repository:
    ```sh
-   git clone https://github.com/yourusername/canvas-mini-projects.git
+   git clone https://github.com/ResponseTime/canvas.git
    ```
 2. Navigate to the project folder:
    ```sh
-   cd canvas-mini-projects
+   cd canvas
    ```
 3. Open `index.html` in your browser.
 
